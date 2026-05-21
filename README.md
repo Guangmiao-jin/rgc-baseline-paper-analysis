@@ -32,6 +32,7 @@ For each recording session, place the corresponding `_cluster.hdf5` file in the 
 ```matlab
 processRetinaFlashStimData.m
 
+
 This script generates the output structures listed below, as well as PSTH and raster plots for each categorised unit.
 
 Indexing note:
