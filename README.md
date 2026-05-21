@@ -23,11 +23,39 @@ Raw MEA recordings were collected using the BioCAM DupleX system (3Brain, Lanqua
 
 ### Pre-processing output
 
-The Python pre-processing scripts perform spike detection, spike extraction, cluster sorting and stimulation pulse extraction. The final pre-processing output, including spike times and stimulation pulse time trains, is saved in `.hdf5` format.
+The Python pre-processing scripts perform spike detection, spike extraction, cluster sorting and stimulation pulse extraction. The final pre-processing output, including spike times and stimulation pulse time trains, is saved in `_cluster.hdf5` format.
 
 ### MATLAB analysis
 
-For each recording session, place the corresponding `.hdf5` file in the single-recording session folder and run:
+For each recording session, place the corresponding `_cluster.hdf5` file in the single-recording session folder and run:
 
 ```matlab
 processRetinaFlashStimData.m
+
+This script generates the output structures listed below, as well as PSTH and raster plots for each categorised unit.
+
+Indexing note:
+The file names for individual unit plots are based on Python indexing, which starts from 0. However, the indices stored in _totalneuronsV2.mat follow MATLAB indexing, which starts from 1. Therefore, unit numbers in plot file names and MATLAB classification indices differ by 1.
+
+_responseMetrics.mat
+
+Contains extracted response parameters, including bias index, inter-spike interval (ISI) coefficient of variation, ISI violation rate, tau value, peri-stimulus time histogram (PSTH), post-tau firing rate, and the ratio of total spike number during the ON epoch to total spike number during the OFF epoch.
+
+_totalneuronsV2.mat
+
+Contains the indices of classified cell clusters, including ON transient, ON sustained, OFF transient, OFF sustained, ON–OFF, unconventional and unresponsive units.
+
+_psth.mat
+
+Contains PSTH values and bin edges for plotting individual cell response traces.
+
+### plotting functions
+
+After executing processRetinaFlashStimData.m and obtaining all the three .mat files, execute the function with '_cluster.hdf5' and '_totalneuronsV2.mat':
+
+```matlab
+plot_locations
+
+This script generates the following:
+
+
