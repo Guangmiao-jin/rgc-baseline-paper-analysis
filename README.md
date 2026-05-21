@@ -19,7 +19,7 @@ This analysis pipeline was developed by Guangmiao Jin, with contributions from D
 
 ### Input data
 
-Raw MEA recordings were collected using the BioCAM DupleX system (3Brain, Lanquart, Switzerland) and saved in `.brw5` format.
+Raw MEA recordings were collected using the BioCAM DupleX system (3Brain, Lanquart, Switzerland) and saved in `.brw` format.
 
 ### Pre-processing output
 
@@ -29,16 +29,18 @@ The Python pre-processing scripts perform spike detection, spike extraction, clu
 
 For each recording session, place the corresponding `_cluster.hdf5` file in the single-recording session folder and run `matlabprocessRetinaFlashStimData.m`
 
-This script generates the output structures listed below, as well as PSTH and raster plots for each categorised unit.
-
-Indexing note:
-The file names for individual unit plots are based on Python indexing, which starts from 0. However, the indices stored in _totalneuronsV2.mat follow MATLAB indexing, which starts from 1. Therefore, unit numbers in plot file names and MATLAB classification indices differ by 1.
+This script generates the output structures and plot listed below, as well as PSTH and raster plots for each categorised unit.
 
 - `_responseMetrics.mat` contains extracted response parameters, including bias index, inter-spike interval (ISI) coefficient of variation, ISI violation rate, tau value, peri-stimulus time histogram (PSTH), post-tau firing rate, and the ratio of total spike number during the ON epoch to total spike number during the OFF epoch.
 
 - `_totalneuronsV2.mat`contains the indices of classified cell clusters, including ON transient, ON sustained, OFF transient, OFF sustained, ON–OFF, unconventional and unresponsive units.
 
 - `_psth.mat`contains PSTH values and bin edges for plotting individual cell response traces.
+  
+- raster plot and PSTH plot for each individual units across 3 light conditions.
+
+Indexing note:
+The file names for individual unit plots are based on Python indexing, which starts from 0. However, the indices stored in _totalneuronsV2.mat follow MATLAB indexing, which starts from 1. Therefore, unit numbers in plot file names and MATLAB classification indices differ by 1.
 
 ### Plotting functions
 
