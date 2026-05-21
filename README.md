@@ -27,36 +27,82 @@ The Python pre-processing scripts perform spike detection, spike extraction, clu
 
 ### MATLAB analysis
 
-For each recording session, place the corresponding `_cluster.hdf5` file in the single-recording session folder and run:
-
-```matlab
-processRetinaFlashStimData.m
-
+For each recording session, place the corresponding `_cluster.hdf5` file in the single-recording session folder and run `matlabprocessRetinaFlashStimData.m`
 
 This script generates the output structures listed below, as well as PSTH and raster plots for each categorised unit.
 
 Indexing note:
 The file names for individual unit plots are based on Python indexing, which starts from 0. However, the indices stored in _totalneuronsV2.mat follow MATLAB indexing, which starts from 1. Therefore, unit numbers in plot file names and MATLAB classification indices differ by 1.
 
-_responseMetrics.mat
+`_responseMetrics.mat`
 
 Contains extracted response parameters, including bias index, inter-spike interval (ISI) coefficient of variation, ISI violation rate, tau value, peri-stimulus time histogram (PSTH), post-tau firing rate, and the ratio of total spike number during the ON epoch to total spike number during the OFF epoch.
 
-_totalneuronsV2.mat
+`_totalneuronsV2.mat`
 
 Contains the indices of classified cell clusters, including ON transient, ON sustained, OFF transient, OFF sustained, ON–OFF, unconventional and unresponsive units.
 
-_psth.mat
+`_psth.mat`
 
 Contains PSTH values and bin edges for plotting individual cell response traces.
 
-### plotting functions
+### Plotting functions
 
-After executing processRetinaFlashStimData.m and obtaining all the three .mat files, execute the function with '_cluster.hdf5' and '_totalneuronsV2.mat':
+After running `processRetinaFlashStimData.m`, the following three `.mat` output files are required for downstream plotting:
 
-```matlab
-plot_locations
+- `_responseMetrics.mat`
+- `_totalneuronsV2.mat`
+- `_psth.mat`
 
-This script generates the following:
+#### Single-recording spatial plots
+
+Run `plot_locations.m` using the corresponding `_cluster.hdf5` and `_totalneuronsV2.mat` files.
+
+This function generates:
+
+- a spatial plot of all classified RGCs projected onto the MEA layout;
+- the percentage of responsive units as a function of distance from the centre of the retina, defined here as the optic nerve head;
+- a `_distance.mat` file containing the spatial and distance information required for downstream plotting.
+
+#### Optional MEA–retina image alignment
+
+If a live image of the retina on the MEA chip was acquired during recording, the image can be aligned to the MEA grid using `chipGridAlign.m`
+
+This is a semi-manual alignment script. The user selects four reference coordinates on the chip image: top left, top right, bottom left and bottom right. The script then uses the known inter-electrode distance, for example 64 µm in our recording setting, to align the retinal image with the MEA grid.
+
+#### Group-level plotting and organising files
+
+For age-group comparisons, place the required output files into folders organised by age group. For example:
+
+rd10_baseline/
+├── d23/
+│   ├── *_distance.mat
+│   ├── *_totalneuronsV2.mat
+│   └── *_psth.mat
+├── d45/
+│   ├── *_distance.mat
+│   ├── *_totalneuronsV2.mat
+│   └── *_psth.mat
+...
+└── d200/
+    ├── *_distance.mat
+    ├── *_totalneuronsV2.mat
+    └── *_psth.mat
+
+
+After the files are organised by age group, run the following plotting functions:
+
+`plot_combined_responsiveness.m`
+Plots the overall percentage of responsive units as a function of distance from the retinal centre across all age groups.
+`plot_totalneurons_stacked.m`
+Generates stacked bar plots showing the proportions of classified RGC response types across age groups.
+`psth_onoff_plot.m`
+Plots the median PSTH traces of ON transient, ON sustained, OFF transient and OFF sustained RGCs within a single age group.
+
+
+
+
+
+
 
 
