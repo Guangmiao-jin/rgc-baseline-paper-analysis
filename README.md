@@ -34,17 +34,11 @@ This script generates the output structures listed below, as well as PSTH and ra
 Indexing note:
 The file names for individual unit plots are based on Python indexing, which starts from 0. However, the indices stored in _totalneuronsV2.mat follow MATLAB indexing, which starts from 1. Therefore, unit numbers in plot file names and MATLAB classification indices differ by 1.
 
-`_responseMetrics.mat`
+-`_responseMetrics.mat` contains extracted response parameters, including bias index, inter-spike interval (ISI) coefficient of variation, ISI violation rate, tau value, peri-stimulus time histogram (PSTH), post-tau firing rate, and the ratio of total spike number during the ON epoch to total spike number during the OFF epoch.
 
-Contains extracted response parameters, including bias index, inter-spike interval (ISI) coefficient of variation, ISI violation rate, tau value, peri-stimulus time histogram (PSTH), post-tau firing rate, and the ratio of total spike number during the ON epoch to total spike number during the OFF epoch.
+-`_totalneuronsV2.mat`contains the indices of classified cell clusters, including ON transient, ON sustained, OFF transient, OFF sustained, ON–OFF, unconventional and unresponsive units.
 
-`_totalneuronsV2.mat`
-
-Contains the indices of classified cell clusters, including ON transient, ON sustained, OFF transient, OFF sustained, ON–OFF, unconventional and unresponsive units.
-
-`_psth.mat`
-
-Contains PSTH values and bin edges for plotting individual cell response traces.
+-`_psth.mat`contains PSTH values and bin edges for plotting individual cell response traces.
 
 ### Plotting functions
 
@@ -74,30 +68,38 @@ This is a semi-manual alignment script. The user selects four reference coordina
 
 For age-group comparisons, place the required output files into folders organised by age group. For example:
 
+```text
 rd10_baseline/
 ├── d23/
-│   ├── *_distance.mat
-│   ├── *_totalneuronsV2.mat
-│   └── *_psth.mat
+│   ├── recording_01_distance.mat
+│   ├── recording_01_totalneuronsV2.mat
+│   ├── recording_01_psth.mat
+│   ├── recording_02_distance.mat
+│   ├── recording_02_totalneuronsV2.mat
+│   └── recording_02_psth.mat
 ├── d45/
-│   ├── *_distance.mat
-│   ├── *_totalneuronsV2.mat
-│   └── *_psth.mat
+│   ├── recording_01_distance.mat
+│   ├── recording_01_totalneuronsV2.mat
+│   └── recording_01_psth.mat
+├── d60/
+│   ├── recording_01_distance.mat
+│   ├── recording_01_totalneuronsV2.mat
+│   └── recording_01_psth.mat
 ...
 └── d200/
-    ├── *_distance.mat
-    ├── *_totalneuronsV2.mat
-    └── *_psth.mat
+    ├── recording_01_distance.mat
+    ├── recording_01_totalneuronsV2.mat
+    └── recording_01_psth.mat
+```
 
 
 After the files are organised by age group, run the following plotting functions:
 
-`plot_combined_responsiveness.m`
-Plots the overall percentage of responsive units as a function of distance from the retinal centre across all age groups.
-`plot_totalneurons_stacked.m`
-Generates stacked bar plots showing the proportions of classified RGC response types across age groups.
-`psth_onoff_plot.m`
-Plots the median PSTH traces of ON transient, ON sustained, OFF transient and OFF sustained RGCs within a single age group.
+-`plot_combined_responsiveness.m` plots the overall percentage of responsive units as a function of distance from the retinal centre across all age groups.
+
+-`plot_totalneurons_stacked.m` generates stacked bar plots showing the proportions of classified RGC response types across age groups.
+
+-`psth_onoff_plot.m`plots the median PSTH traces of ON transient, ON sustained, OFF transient and OFF sustained RGCs within a single age group.
 
 
 
