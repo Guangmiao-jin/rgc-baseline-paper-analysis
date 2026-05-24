@@ -5,7 +5,7 @@ addParameter(p, 'BinWidth', 50, @isnumeric); %
 addParameter(p, 'SmoothWindow', 3, @isnumeric); % 
 parse(p, varargin{:});
 
-%% read the tiff file
+%% read the .tiff file
 I = imread(imgPath);
 %imSz = size(I);
 figure('Name','Chip Grid Calibration','NumberTitle','off');
