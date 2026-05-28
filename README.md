@@ -66,6 +66,20 @@ If a live image of the retina on the MEA chip was acquired during recording, the
 
 This is a semi-manual alignment script. The user selects four reference coordinates on the chip image: top left, top right, bottom left and bottom right. The script then uses the known inter-electrode distance, for example 64 µm in our recording setting, to align the retinal image with the MEA grid.
 
+#### Single-cell PSTH median trace graph
+
+Run `plotAllRasterPSTHs_combined_Response_examples.m` using `plotMetrics.m` which can be derived from `_psth.mat`.
+
+Each `_psth.mat` file contains a `pltcurve` structure 
+with the following fields:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `trialPSTHs` | 1×N cell array | Each element corresponds to one neuron, containing a 1×3 cell array representing three light conditions. Each condition stores a matrix of dimensions `(n_repetitions × n_time_bins)`. |
+| `PSTH_binEdges` | vector | Time bin edges (in seconds) spanning the pre- and post-stimulation periods. Bin centres are computed as the midpoint between consecutive edges. |
+
+This function generates a PSTH plot with three light conditions for a defined cell
+
 #### Group-level plotting and organising files
 
 For age-group comparisons, place the required output files into folders organised by age group. For example:
