@@ -1,11 +1,23 @@
 function analyze_onoff_PSTH(folderPath)
-% analyze_onoff_PSTH_day('D:/rd10_baseline/day N')
-% read current day folder: *_totalneuronsV2.mat + corresponding *_psth.mat
-% On/Off × trans/sus -> 4 traces（all mice in the same age group combined）
-
+% This function summarize and analyze the ON/OFF PSTH responses of retinal neurons of mice in the same experimental group/day of age
+%% Usage example:
+% analyze_onoff_PSTH('D:/rd10_baseline/day N')
+%% Input description:
+% folderPath - the folder path containing *_totalneuronsV2.mat (cell classification) and the corresponding *_psth.mat (PSTH data)
+%% Flow:
+% Combine all neurons into four categories: On-Transient, On-Sustained, Off-Transient, and Off-Sustained.
+% Calculate the population median and 25%/75% interquartile range, calculate the peak index at the retinal level and save it.
     if nargin < 1 || isempty(folderPath)
         folderPath = pwd;
     end
+
+    % --- Peak / baseline windows in seconds ---
+    win = struct();
+    win.OnTrans.baseline  = [0, 2];   win.OnTrans.response  = [-2, 0];
+    win.OnSus.baseline    = [0, 2];   win.OnSus.response    = [-2, 0];
+    win.OffTrans.baseline = [-2, 0];   win.OffTrans.response = [ 0, 2];
+    win.OffSus.baseline   = [-2, 0];   win.OffSus.response   = [ 0, 2];
+
 
     %======================================================================
     % 1. find all *_totalneuronsV2.mat files（each file corresponds to one
@@ -25,6 +37,10 @@ function analyze_onoff_PSTH(folderPath)
     end
     time = [];
     binSize_ms = [];
+    retinaMetrics = struct();  % one entry per retina
+    retinaCount = 0;
+    retinaCellStats = struct();
+
 
     %======================================================================
     % 2. go through every *_totalneuronsV2 + *_psth in current day folder 
@@ -35,6 +51,11 @@ function analyze_onoff_PSTH(folderPath)
 
         % "_totalneuronsV2" file
         prefix = erase(baseName, '_totalneuronsV2');
+        
+        retinaCount = retinaCount + 1;
+        retinaMetrics(retinaCount).prefix = prefix;
+        retinaCellStats(retinaCount).prefix = prefix;
+
 
         psthFileName = [prefix '_psth.mat'];
         psthFilePath = fullfile(folderPath, psthFileName);
@@ -74,6 +95,33 @@ function analyze_onoff_PSTH(folderPath)
         off_trans_idx = off_trans_0 + 1;
         off_sus_idx   = off_sus_0   + 1;
 
+        nOnTrans  = numel(on_trans_0);
+        nOnSus    = numel(on_sus_0);
+        nOffTrans = numel(off_trans_0);
+        nOffSus   = numel(off_sus_0);
+        
+        nOn  = nOnTrans + nOnSus;
+        nOff = nOffTrans + nOffSus;
+        nAll_classified = nOn + nOff;
+
+         all_idx_0 = tn.allneurons;  
+         nAll_units = numel(all_idx_0);
+         fracOn_inAll         = nOn  / nAll_units;
+         fracOff_inAll        = nOff / nAll_units;       % OFF perc
+
+        retinaCellStats(retinaCount).nOnTrans = nOnTrans;
+        retinaCellStats(retinaCount).nOnSus   = nOnSus;
+        retinaCellStats(retinaCount).nOffTrans= nOffTrans;
+        retinaCellStats(retinaCount).nOffSus  = nOffSus;
+        retinaCellStats(retinaCount).nOn  = nOn;
+        retinaCellStats(retinaCount).nOff = nOff;
+        retinaCellStats(retinaCount).nAll_classified = nAll_classified;
+        retinaCellStats(retinaCount).nAll_units      = nAll_units;
+        retinaCellStats(retinaCount).fracOn_inAll = fracOn_inAll;
+        retinaCellStats(retinaCount).fracOff_inAll        = fracOff_inAll;
+
+
+
         %------------------------------------------------------------------
         % 2.2 read pltcurve in psth file  
         %------------------------------------------------------------------
@@ -88,7 +136,7 @@ function analyze_onoff_PSTH(folderPath)
         edges      = unwrap_edges(edges);
 
         if numel(edges) < 2
-            warning('The length of PSTH_binEdges is not enough，skip %s ', psthFilePath);
+            warning('The length of PSTH_binEdges is not enough，skip %s。', psthFilePath);
             continue;
         end
 
@@ -161,6 +209,21 @@ function analyze_onoff_PSTH(folderPath)
 
             % Add traces into retina group
             allGroupTraces.(gName) = [allGroupTraces.(gName); localTraces];
+            % ---- NEW: retina-level metric for statistics ----
+            validRows = all(~isnan(localTraces), 2);
+            localTraces2 = localTraces(validRows, :);
+            if size(localTraces2,1) >= 10
+                medTrace = median(localTraces2, 1, 'omitnan');
+                mm = compute_peak_metric(time, medTrace, win.(gName));
+
+                retinaMetrics(retinaCount).(gName).ok        = true;
+                retinaMetrics(retinaCount).(gName).nNeurons  = size(localTraces2,1);
+                retinaMetrics(retinaCount).(gName).peakDelta = mm.peakDelta; % <-- use this for age comparisons
+                retinaMetrics(retinaCount).(gName).peakAbs   = mm.peakAbs;
+                retinaMetrics(retinaCount).(gName).baseMean  = mm.baseMean;
+            else
+                retinaMetrics(retinaCount).(gName).ok = false;
+            end
         end
 
         clear psthData trialPSTHs;
@@ -206,10 +269,10 @@ function analyze_onoff_PSTH(folderPath)
         % median trace
         plot(time, medianTrace, 'k', 'LineWidth', 2);
 
-        yL = [0 70];
-        plot([0 0], yL, ':k', 'LineWidth', 1);
+        yL = [0 45];
+        %plot([0 0], yL, ':k', 'LineWidth', 1);
         ylim(yL);
-        xlim([0 2])
+        xlim([-2 0]);
 
         %xlabel('Time (s)');
         %ylabel('Firing rate (spikes/s)');
@@ -220,15 +283,21 @@ function analyze_onoff_PSTH(folderPath)
         % save as either PNG or TIF
         figBaseName = sprintf('%s_%s_PSTH_median', ...
                               get_folder_shortname(folderPath), gName);
-        saveas(fig, fullfile(folderPath, [figBaseName '.pdf']));
+        %exportgraphics(fig,fullfile(folderPath, [figBaseName '.pdf']),'ContentType','vector');
         close(fig);
 
+        %{
         % save stats in meanRateEach
         stats.meanRateEach_spkPerSec = meanRateEach;
         stats.medianTrace_spkPerSec  = medianTrace;
         stats.p25_spkPerSec          = p25;
         stats.p75_spkPerSec          = p75;
         %save(fullfile(folderPath, [figBaseName '_stats.mat']), 'stats');
+        %}
+        save(fullfile(folderPath, 'retina_level_peak_metrics.mat'), ...
+     'retinaMetrics', 'win', 'time', 'binSize_ms');
+        save(fullfile(folderPath,'retina_level_cell_fraction.mat'), 'retinaCellStats');
+
     end
 end
 function edges = unwrap_edges(edgesIn)
@@ -245,7 +314,7 @@ function edges = unwrap_edges(edgesIn)
         edges = edges{1};
     end
     if ~isvector(edges)
-        error('PSTH_binEdges is not vectorized.');
+        error('PSTH_binEdges is not vectorized。');
     end
     edges = edges(:)';   % converted to vector
 end
@@ -253,4 +322,15 @@ end
 % convert D:/rd10_baseline/day N to dayN
 function name = get_folder_shortname(folderPath)
     [~, name] = fileparts(folderPath);
+end
+function mm = compute_peak_metric(time, trace, win)
+    baseMask = time >= win.baseline(1) & time <= win.baseline(2);
+    respMask = time >= win.response(1)  & time <= win.response(2);
+
+    baseMean = mean(trace(baseMask), 'omitnan');
+    peakAbs  = max(trace(respMask), [], 'omitnan');
+
+    mm.baseMean  = baseMean;
+    mm.peakAbs   = peakAbs;
+    mm.peakDelta = peakAbs - baseMean;
 end
