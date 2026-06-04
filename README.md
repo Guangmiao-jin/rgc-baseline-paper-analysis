@@ -9,11 +9,15 @@ This analysis pipeline was developed by Guangmiao Jin, with contributions from D
 - **Guangmiao Jin** developed the overall pipeline structure, selected and adjusted key analysis and classification parameters, implemented the RGC response classification workflow, and organised the plotting and percentage comparison analyses.
 - **Dr Michael Savage** contributed to the Python stimulation pulse extraction script, MATLAB code optimisation, code annotation and commenting, and technical review of the analysis pipeline.
 
+## Project background
+
+This project characterises the functional decline of rd10 mouse retinas from postnatal day 23 (P23), when rod degeneration peaks, to P200, when photoreceptors are largely lost. Retinal light responses were recorded using a 4096-channel multi-electrode array (MEA), and this pipeline converts raw MEA recordings into processed response metrics, classified RGC response types, and publication-ready plots.
+
 ## Repository structure
 
 - **pre-processing**: adapts the HerdingSpikes2 Lightning workflow ([HS2](https://github.com/mhhennig/HS2)), which is based on the SpikeInterface sorting framework. This step performs spike detection, spike extraction, spike sorting and stimulation pulse extraction from raw MEA recordings.
 - **analysis**: aligns stimulation time points with spike times, separates noise from electrophysiologically valid sorted units, extracts response metrics, and classifies selected sorted units into ON, OFF, ON–OFF, unconventional and unresponsive response types.
-- **plotting**: generates single-recording plots, including sorted unit locations, response subtype percentages, pie charts of classified cell types, and transient/sustained response subtype summaries.
+- **plotting**: generates single-recording plots, including sorted unit locations, response subtype percentages, example RGC PSTH graphs.
 
 ## Input and output data format
 
